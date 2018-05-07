@@ -134,7 +134,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
 
             case 'catstats':
-                stats.getCatStats(bot, channelID);
+                stats.printStats(bot, channelID);
                 log("catstats command executed");
                 break;
         }

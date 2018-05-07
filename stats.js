@@ -5,11 +5,14 @@ const StringBuilder = require('string-builder');
 
 const auth = require('./auth.json'); //you need to make this file yourself!
 
+const dbName = 'catbot';
+const collectionName = 'catstats';
+
 
 //Use this function to incremement a stat
 exports.incrementStat = (name) => {
 
-    client.connect(auth.mongourl, function(err, connection) {
+    client.connect(auth.mongourl, function(err, client) {
     
         if (err)
         {
@@ -19,15 +22,15 @@ exports.incrementStat = (name) => {
 
         log("connected to mongodb");
         
-        let database = connection.db('catbot');
-        let catstats = database.collection('catstats');
+        let database = client.db(dbName);
+        let catstats = database.collection(collectionName);
 
         catstats.update(
             { name: name },
             { $inc: { count: 1 } }
         )
     
-        connection.close();
+        client.close();
 
         log(`incremented stat ${name} successfully`);
 
@@ -35,11 +38,10 @@ exports.incrementStat = (name) => {
 }
 
 
+//use this function to print stats
+exports.printStats = (bot, channelID) => {
 
-//use this function to get stats
-exports.getCatStats = (bot, channelID) => {
-
-    client.connect(auth.mongourl, function(err, connection) {
+    client.connect(auth.mongourl, function(err, client) {
     
         if (err)
         {
@@ -49,11 +51,12 @@ exports.getCatStats = (bot, channelID) => {
 
         log("connected to mongodb");
         
-        let database = connection.db('catbot');
-        let catstats = database.collection('catstats');
+        let database = client.db(dbName);
+        let catstats = database.collection(collectionName);
 
         var sb = new StringBuilder();
         catstats.find({}).toArray(function(err, result) {
+
             if (err)
             {
                 log("failed to find documents: " + err);
@@ -75,8 +78,6 @@ exports.getCatStats = (bot, channelID) => {
             
           });
 
-        connection.close();
+        client.close();
     });  
 }
-
-
