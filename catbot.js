@@ -5,8 +5,7 @@
 const discord = require('discord.io');
 const log = require('debug')('catbot')
 const request = require('request');
-const mongoClient = require('mongodb').MongoClient
-const StringBuilder = require('string-builder')
+const stats = require('./stats');
 
 const auth = require('./auth.json'); //you need to make this file yourself!
 
@@ -16,34 +15,6 @@ function onError(bot, channelID) {
             to: channelID,
             message: "Sorry, I'm catnapping now. Please ask me later."
         });
-}
-
-//Use this function to incremement a stat
-function incrementStat(name)
-{
-    mongoClient.connect(auth.mongourl, function(err, database) {
-    
-        if (err)
-        {
-            log("failed to connect to mongodb with error: " + err);
-            return;
-        }
-
-        log("connected to mongodb");
-        
-        let connection = database.db('catbot');
-        let catstats = connection.collection('catstats');
-
-        catstats.update(
-            { name: name },
-            { $inc: { count: 1 } }
-        )
-    
-        database.close();
-
-        log(`incremented stat ${name} successfully`);
-
-  });  
 }
 
 //Use this function to post a cat fact into the relevant discord channel via the bot object.
@@ -85,7 +56,7 @@ function getCatPic(bot, channelID, userID) {
                 }
         });
 
-        incrementStat("catpics");
+        stats.incrementStat("catpics");
         log("catpic command completed");
     });
 
@@ -100,47 +71,7 @@ function stroke(bot, channelID, userID) {
             message: "**puuurrrrrrrrrr!** Thank you <@" + userID + "> **:3**"
         });
     
-    incrementStat("catstrokes");
-}
-
-
-//use this function to get stats
-function getCatStats(bot, channelID) {
-
-    mongoClient.connect(auth.mongourl, function(err, database) {
-    
-        if (err)
-        {
-            log("failed to connect to mongodb with error: " + err);
-            return;
-        }
-
-        log("connected to mongodb");
-        
-        let connection = database.db('catbot');
-        let catstats = connection.collection('catstats');
-
-        catstats.find({}).toArray(function(err, result) {
-            if (err) throw err;
-
-            var sb = new StringBuilder();
-            sb.appendLine("So far I have:")
-
-            for(var i in result)
-            {
-                sb.appendLine(`\t${result[i].prefix} **${result[i].count}** ${result[i].suffix}`);  
-            }
-
-            bot.sendMessage(
-                {
-                    to: channelID,
-                    message: sb.toString()
-                });
-            
-          });
-
-        database.close();
-    });  
+        stats.incrementStat("catstrokes");
 }
 
 // Initialize Discord Bot
@@ -203,7 +134,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
 
             case 'catstats':
-                getCatStats(bot, channelID);
+                stats.getCatStats(bot, channelID);
                 log("catstats command executed");
                 break;
         }
