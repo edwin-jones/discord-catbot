@@ -20,6 +20,7 @@ exports.incrementStat = (name) => {
             {
                 log("failed to connect to mongodb: " + err);
                 reject(err);
+                return;
             }
 
             log("connected to mongodb");
@@ -53,6 +54,7 @@ exports.getStats = () => {
             {
                 log("failed to connect to mongodb: " + err);
                 reject(err);
+                return;
             }
 
             log("connected to mongodb");
@@ -67,6 +69,7 @@ exports.getStats = () => {
                 {
                     log("failed to find documents: " + err);
                     reject(err);
+                    return;
                 }
 
                 sb.appendLine("So far I have:")
@@ -81,6 +84,5 @@ exports.getStats = () => {
 
             client.close();
         }); 
-
     });
 }

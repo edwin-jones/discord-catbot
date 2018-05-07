@@ -4,7 +4,7 @@
 //dependencies
 const discord = require('discord.io');
 const log = require('debug')('catbot')
-const request = require('request');
+const request = require('request-promise');
 
 const stats = require('./stats');
 const auth = require('./auth.json'); //you need to make this file yourself!
@@ -32,21 +32,16 @@ function sendMessage(bot, channelID, message)
 async function onError(bot, channelID) {
 
     await sendMessage(bot, channelID, "Sorry, I'm catnapping now. Please ask me later.");
-
 }
 
 //Use this function to post a cat fact into the relevant discord channel via the bot object.
-function getCatFact(bot, channelID) {
-    request('https://polite-catfacts.herokuapp.com/catfact', { json: true }, async (err, res, body) => {
-        if (err) {
-            onError(bot, channelID);
-            return;
-        }
-
-        await sendMessage(bot, channelID, body.fact);
+async function getCatFact(bot, channelID) {
+    
+        let response = await request('https://polite-catfacts.herokuapp.com/catfact')
+        
+        await sendMessage(bot, channelID, response.fact);
         await stats.incrementStat("catfacts");
         log("catfact command completed");
-    });
 }
 
 //use this function to get cat pictures and post them in discord
