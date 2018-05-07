@@ -1,3 +1,5 @@
+'use strict';
+
 //dependencies
 const log = require('debug')('stats');
 const client = require('mongodb').MongoClient;
@@ -14,17 +16,16 @@ exports.incrementStat = (name) => {
 
     return new Promise((resolve, reject) => {
 
-        client.connect(auth.mongourl, function(err, client) {
-        
-            if (err)
-            {
+        client.connect(auth.mongourl, function (err, client) {
+
+            if (err) {
                 log("failed to connect to mongodb: " + err);
                 reject(err);
                 return;
             }
 
             log("connected to mongodb");
-            
+
             let database = client.db(dbName);
             let catstats = database.collection(collectionName);
 
@@ -32,41 +33,38 @@ exports.incrementStat = (name) => {
                 { name: name },
                 { $inc: { count: 1 } }
             );
-        
+
             client.close();
 
             log(`incremented stat ${name} successfully`);
 
             resolve();
         });
-    }); 
+    });
 }
-
 
 //use this function to get stats. Returns a promise of a string (to send to chat)
 exports.getStats = () => {
 
     return new Promise((resolve, reject) => {
 
-        client.connect(auth.mongourl, function(err, client) {
-        
-            if (err)
-            {
+        client.connect(auth.mongourl, function (err, client) {
+
+            if (err) {
                 log("failed to connect to mongodb: " + err);
                 reject(err);
                 return;
             }
 
             log("connected to mongodb");
-            
+
             let database = client.db(dbName);
             let catstats = database.collection(collectionName);
 
             var sb = new StringBuilder();
-            catstats.find({}).toArray(function(err, result) {
+            catstats.find({}).toArray(function (err, result) {
 
-                if (err)
-                {
+                if (err) {
                     log("failed to find documents: " + err);
                     reject(err);
                     return;
@@ -74,15 +72,14 @@ exports.getStats = () => {
 
                 sb.appendLine("So far I have:")
 
-                for(var i in result)
-                {
-                    sb.appendLine(`\t${result[i].prefix} **${result[i].count}** ${result[i].suffix}`);  
+                for (var i in result) {
+                    sb.appendLine(`\t${result[i].prefix} **${result[i].count}** ${result[i].suffix}`);
                 }
 
                 resolve(sb.toString());
             });
 
             client.close();
-        }); 
+        });
     });
 }
