@@ -9,36 +9,49 @@ const request = require('request');
 const stats = require('./stats');
 const auth = require('./auth.json'); //you need to make this file yourself!
 
-function onError(bot, channelID) {
-    bot.sendMessage(
-        {
-            to: channelID,
-            message: "Sorry, I'm catnapping now. Please ask me later."
-        });
+const helpmsg = 
+                "You can ask me for a random cat fact with **!catfact**, picture with **!catpic** " +
+                "or you can stroke me with **!stroke** - " +
+                "I do love to be stroked **:3**\n" +
+                "I can also provide interesting stats with the **!catstats** command.";
+
+
+function sendMessage(bot, channelID, message)
+{
+    return new Promise((resolve, reject) => {
+        bot.sendMessage(
+            {
+                to: channelID,
+                message: message
+            });
+
+        resolve();
+    });
+}
+
+async function onError(bot, channelID) {
+
+    await sendMessage(bot, channelID, "Sorry, I'm catnapping now. Please ask me later.");
+
 }
 
 //Use this function to post a cat fact into the relevant discord channel via the bot object.
 function getCatFact(bot, channelID) {
-    request('https://polite-catfacts.herokuapp.com/catfact', { json: true }, (err, res, body) => {
+    request('https://polite-catfacts.herokuapp.com/catfact', { json: true }, async (err, res, body) => {
         if (err) {
             onError(bot, channelID);
             return;
         }
 
-        bot.sendMessage(
-            {
-                to: channelID,
-                message: body.fact
-            });
-
-        stats.incrementStat("catfacts");
+        await sendMessage(bot, channelID, body.fact);
+        await stats.incrementStat("catfacts");
         log("catfact command completed");
     });
 }
 
 //use this function to get cat pictures and post them in discord
 function getCatPic(bot, channelID, userID) {
-    request('http://thecatapi.com/api/images/get?format=src', (err, res, body) => {
+    request('http://thecatapi.com/api/images/get?format=src', async (err, res, body) => {
         if (err) {
             onError(bot, channelID);
             return;
@@ -56,22 +69,18 @@ function getCatPic(bot, channelID, userID) {
                 }
         });
 
-        stats.incrementStat("catpics");
+        await stats.incrementStat("catpics");
         log("catpic command completed");
     });
 
 }
 
 //use this function to stroke catbot!
-function stroke(bot, channelID, userID) {
+async function stroke(bot, channelID, userID) {
     
-    bot.sendMessage(
-        {
-            to: channelID,
-            message: "**puuurrrrrrrrrr!** Thank you <@" + userID + "> **:3**"
-        });
-    
-        stats.incrementStat("catstrokes");
+    await sendMessage(bot, channelID, "**puuurrrrrrrrrr!** Thank you <@" + userID + "> **:3**");
+    await stats.incrementStat("catstrokes");
+    log("catstroke command completed");
 }
 
 // Initialize Discord Bot
@@ -95,7 +104,7 @@ bot.on('disconnect', function (erMsg, code) {
 })
 
 //log when the bot get a message. NOTE: discord supports markdown syntax.
-bot.on('message', function (user, userID, channelID, message, evt) {
+bot.on('message', async function (user, userID, channelID, message, evt) {
     // catbot needs to know if it will execute a command
     // It will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
@@ -108,13 +117,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         switch (cmd) {
             // handle commands
             case 'help':
-                bot.sendMessage(
-                    {
-                        to: channelID,
-                        message: "You can ask me for a random cat fact with **!catfact**, picture with **!catpic** or you can stroke me with **!stroke** - I do love to be stroked **:3**\n" +
-                                 "I can also provide interesting stats with the **!catstats** command."
-                    });
-
+                await sendMessage(bot, channelID, helpmsg);  
                 log("help command executed");
                 break;
 
@@ -134,7 +137,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
 
             case 'catstats':
-                stats.printStats(bot, channelID);
+                var message = await stats.getStats();
+                await sendMessage(bot, channelID, message);
                 log("catstats command executed");
                 break;
         }
