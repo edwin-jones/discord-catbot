@@ -1,7 +1,7 @@
 //dependencies
-const log = require('debug')('stats')
-const mongoClient = require('mongodb').MongoClient
-const StringBuilder = require('string-builder')
+const log = require('debug')('stats');
+const client = require('mongodb').MongoClient;
+const StringBuilder = require('string-builder');
 
 const auth = require('./auth.json'); //you need to make this file yourself!
 
@@ -9,25 +9,25 @@ const auth = require('./auth.json'); //you need to make this file yourself!
 //Use this function to incremement a stat
 exports.incrementStat = (name) => {
 
-    mongoClient.connect(auth.mongourl, function(err, database) {
+    client.connect(auth.mongourl, function(err, connection) {
     
         if (err)
         {
-            log("failed to connect to mongodb with error: " + err);
+            log("failed to connect to mongodb: " + err);
             return;
         }
 
         log("connected to mongodb");
         
-        let connection = database.db('catbot');
-        let catstats = connection.collection('catstats');
+        let database = connection.db('catbot');
+        let catstats = database.collection('catstats');
 
         catstats.update(
             { name: name },
             { $inc: { count: 1 } }
         )
     
-        database.close();
+        connection.close();
 
         log(`incremented stat ${name} successfully`);
 
@@ -39,23 +39,27 @@ exports.incrementStat = (name) => {
 //use this function to get stats
 exports.getCatStats = (bot, channelID) => {
 
-    mongoClient.connect(auth.mongourl, function(err, database) {
+    client.connect(auth.mongourl, function(err, connection) {
     
         if (err)
         {
-            log("failed to connect to mongodb with error: " + err);
+            log("failed to connect to mongodb: " + err);
             return;
         }
 
         log("connected to mongodb");
         
-        let connection = database.db('catbot');
-        let catstats = connection.collection('catstats');
+        let database = connection.db('catbot');
+        let catstats = database.collection('catstats');
 
+        var sb = new StringBuilder();
         catstats.find({}).toArray(function(err, result) {
-            if (err) throw err;
+            if (err)
+            {
+                log("failed to find documents: " + err);
+                return;
+            }
 
-            var sb = new StringBuilder();
             sb.appendLine("So far I have:")
 
             for(var i in result)
@@ -71,7 +75,7 @@ exports.getCatStats = (bot, channelID) => {
             
           });
 
-        database.close();
+        connection.close();
     });  
 }
 

@@ -5,8 +5,8 @@
 const discord = require('discord.io');
 const log = require('debug')('catbot')
 const request = require('request');
-const stats = require('./stats');
 
+const stats = require('./stats');
 const auth = require('./auth.json'); //you need to make this file yourself!
 
 function onError(bot, channelID) {
@@ -31,7 +31,7 @@ function getCatFact(bot, channelID) {
                 message: body.fact
             });
 
-        incrementStat("catfacts");
+        stats.incrementStat("catfacts");
         log("catfact command completed");
     });
 }
@@ -112,7 +112,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     {
                         to: channelID,
                         message: "You can ask me for a random cat fact with **!catfact**, picture with **!catpic** or you can stroke me with **!stroke** - I do love to be stroked **:3**\n" +
-                                 "I can also provide interesting cat fact stats with the **!catstats** command."
+                                 "I can also provide interesting stats with the **!catstats** command."
                     });
 
                 log("help command executed");
