@@ -5,19 +5,28 @@
   "main": "catbot.js",
   "scripts": {
     "start": "node catbot.js",
+    "build": "tsc",
+    "develop": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Edwin Jones",
   "license": "MIT",
   "dependencies": {
     "debug": "^3.1.0",
-    "discord.io": "github:woor/discord.io#gateway_v6",
+    "discord.js": "11.3.2",
     "mongodb": "^3.0.7",
     "request": "^2.85.0",
     "request-promise": "^4.2.2",
     "string-builder": "^0.1.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/mongodb": "^3.0.18",
+    "@types/node": "10.0.6",
+    "@types/request-promise": "4.1.41",
+    "nodemon": "1.17.4",
+    "ts-node": "6.0.3",
+    "typescript": "2.8.3"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/edwinj85/catbot.git"
