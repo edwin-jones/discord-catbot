@@ -37,9 +37,11 @@ function sendMessage(bot: discord.Client, channel: discord.TextChannel, message:
  * @param url the url of the image
  */
 function sendImage(bot: discord.Client, channel: discord.TextChannel, url: string) {
-    return channel.sendEmbed({
-        color: 4954687, //RGB value cast from hex to int. This is green!
-        image: { url }
+    return channel.send({
+        embed: {
+            color: 4954687, //RGB value cast from hex to int. This is green!
+            image: { url }
+        }
     });
 }
 
