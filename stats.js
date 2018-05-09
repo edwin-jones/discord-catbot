@@ -1,3 +1,6 @@
+// Written by Edwin Jones - http://edwinjones.me.uk
+// Documentation and Discord.js integration by Jason Browne - https://jbrowne.io
+
 'use strict';
 
 //dependencies
@@ -11,7 +14,12 @@ const dbName = 'catbot';
 const collectionName = 'catstats';
 
 
-//Use this function to incremement a stat. Returns a promise.
+/**
+ * Use this function to incremement a stat
+ *
+ * @param name the stat to increment
+ * @returns a Promise that resolves on success, or rejects on failure
+ */
 exports.incrementStat = (name) => {
 
     return new Promise((resolve, reject) => {
@@ -43,7 +51,11 @@ exports.incrementStat = (name) => {
     });
 }
 
-//use this function to get stats. Returns a promise of a string (to send to chat)
+/**
+ * Use this function to get stats
+ *
+ * @returns a promise of a string (to send to chat)
+ */
 exports.getStats = () => {
 
     return new Promise((resolve, reject) => {
