@@ -11,7 +11,7 @@ const client = new MongoClient(auth.mongourl);
 
 
 //Use this function to incremement a stat. Returns a promise.
-exports.incrementStat = (name: string) => {
+export function incrementStat(name: string): Promise<void> {
 
     return new Promise((resolve, reject) => {
 
@@ -44,7 +44,7 @@ exports.incrementStat = (name: string) => {
 }
 
 //use this function to get stats. Returns a promise of a string (to send to chat)
-exports.getStats = () => {
+export function getStats(): Promise<string> {
 
     return new Promise((resolve, reject) => {
 
