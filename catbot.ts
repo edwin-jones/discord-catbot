@@ -2,11 +2,11 @@
 //written by Edwin Jones - http://edwinjones.me.uk
 
 //dependencies
-const discord = require('discord.io');
+import * as discord from 'discord.js';
 const log = require('debug')('catbot')
 import * as request from 'request-promise';
 
-const stats = require('./stats');
+import * as stats from './stats';
 const auth = require('./auth.json'); //you need to make this file yourself!
 
 const helpmsg =
@@ -17,49 +17,32 @@ const helpmsg =
 
 
 //send a message to discord
-function sendMessage(bot: any, channelID: any, message: any) {
-
-    return new Promise((resolve, reject) => {
-
-        bot.sendMessage(
-            {
-                to: channelID,
-                message: message
-
-            }, resolve);
-    });
+function sendMessage(bot: discord.Client, channel: discord.TextChannel, message: string) {
+    return channel.send(message);
 }
 
 //send an image (via a url) to discord
-function sendImage(bot: any, channelID: any, url: any) {
-
-    return new Promise((resolve, reject) => {
-
-        bot.sendMessage(
-            {
-                to: channelID,
-                embed:
-                    {
-                        color: 4954687, //RGB value cast from hex to int. This is green!
-                        image:
-                            {
-                                url: url
-                            }
-                    }
-            }, resolve);
+function sendImage(bot: discord.Client, channel: discord.TextChannel, url: string) {
+    return channel.sendEmbed({
+        color: 4954687, //RGB value cast from hex to int. This is green!
+        image: { url }
     });
 }
 
-//error handler
-async function onError(bot: any, channelID: any, err: any) {
-
+/**
+ * Error handler
+ *
+ * @param bot the client this bot is connected with
+ * @param channel the text channel to send the message to
+ * @param err the error message to log
+ */
+async function onError(bot: discord.Client, channel: discord.TextChannel, err: any) {
     log(`Error: ${err}`);
-    await sendMessage(bot, channelID, "Sorry, I'm catnapping now. Please ask me later.");
+    await sendMessage(bot, channel, 'Sorry, I\'m catnapping now. Please ask me later.');
 }
 
 //Use this function to post a cat fact into the relevant discord channel via the bot object.
-async function getCatFact(bot: any, channelID: any) {
-
+async function getCatFact(bot: discord.Client, channel: discord.TextChannel) {
     var options = {
         method: 'GET',
         uri: 'https://polite-catfacts.herokuapp.com/catfact',
@@ -68,15 +51,20 @@ async function getCatFact(bot: any, channelID: any) {
 
     let response = await request(options);
 
-    await sendMessage(bot, channelID, response.fact);
-    await stats.incrementStat("catfacts");
-    log("catfact command completed");
+    await sendMessage(bot, channel, response.fact);
+    await stats.incrementStat('catfacts');
+    log('catfact command completed');
 }
 
-//use this function to get cat pictures and post them in discord
-async function getCatPic(bot: any, channelID: any) {
-
-    var include_href = (body: any, response: any, resolveWithFullResponse: any) => {
+/**
+ * Use this function to get cat pictures and post them in discord
+ *
+ * @param bot the client this bot is connected with
+ * @param channel the channel to send the image to
+ */
+async function getCatPic(bot: discord.Client, channel: discord.TextChannel) {
+    // Blindly typing as `any` to prevent excess imports
+    var include_href = (body: any, response: any, resolveWithFullResponse: boolean) => {
         return { 'href': response.request.href };
     };
 
@@ -87,86 +75,90 @@ async function getCatPic(bot: any, channelID: any) {
     }
 
     let response = await request(options);
-    await sendImage(bot, channelID, response.href)
-    await stats.incrementStat("catpics");
+    await sendImage(bot, channel, response.href)
+    await stats.incrementStat('catpics');
 
-    log("catpic command completed");
+    log('catpic command completed');
 }
 
 //use this function to stroke catbot!
-async function stroke(bot: any, channelID: any, userID: any) {
-
-    await sendMessage(bot, channelID, "**puuurrrrrrrrrr!** Thank you <@" + userID + "> **:3**");
-    await stats.incrementStat("catstrokes");
-    log("catstroke command completed");
+async function stroke(bot: discord.Client, channel: discord.TextChannel, userID: discord.Snowflake) {
+    await sendMessage(bot, channel, `**puuurrrrrrrrrr!** Thank you <@${userID}> **:3**`);
+    await stats.incrementStat('catstrokes');
+    log('catstroke command completed');
 }
 
 // Initialize Discord Bot
-var bot = new discord.Client(
-    {
-        token: auth.token,
-        autorun: true
-    });
+var bot = new discord.Client();
 
 //log when the bot is ready
 bot.on('ready', () => {
-
     log('Connected');
     log('Logged in as: ');
-    log(bot.username + ' - (' + bot.id + ')');
+    log(`${bot.user.username} - (${bot.user.id})`);
 });
 
 //handle disconnects by auto reconnecting
 bot.on('disconnect', (erMsg: any, code: any) => {
-
     log(`----- Bot disconnected from Discord with code ${code} for reason: ${erMsg} -----`);
-    bot.connect();
+    bot.login();
 })
 
 //decide what to do when the bot get a message. NOTE: discord supports markdown syntax.
-bot.on('message', async (user: any, userID: any, channelID: any, message: any, evt: any) => {
+bot.on('message', async (message: discord.Message) => {
+
+    // I'd like to be able to remove this limitation, but TextBasedChannel (the
+    // base channel class) is not exported in the typings
+    if (message.channel.type !== 'text') {
+        log('Not a text channel');
+        return;
+    }
+  
+    const typedChannel = message.channel as discord.TextChannel;
 
     try {
         // catbot needs to know if it will execute a command
         // It will listen for messages that will start with `!`
-        if (message.substring(0, 1) == '!') {
-            log("recieved a command!")
+        if (message.content.substring(0, 1) == '!') {
+            log('recieved a command!')
 
-            let args = message.substring(1).split(' ');
+            let args = message.content.substring(1).split(' ');
             let cmd = args[0];
             args = args.splice(1);
 
             switch (cmd) {
                 // handle commands
                 case 'help':
-                    await sendMessage(bot, channelID, helpmsg);
+                    await sendMessage(bot, typedChannel, helpmsg);
                     log("help command executed");
                     break;
 
                 case 'catfact':
-                    getCatFact(bot, channelID);
+                    getCatFact(bot, typedChannel);
                     log("catfact command executed");
                     break;
 
                 case 'catpic':
-                    getCatPic(bot, channelID);
+                    getCatPic(bot, typedChannel);
                     log("catpic command executed");
                     break;
 
                 case 'stroke':
-                    stroke(bot, channelID, userID);
+                    stroke(bot, typedChannel, message.author.id);
                     log("stroke command executed");
                     break;
 
                 case 'catstats':
-                    var message = await stats.getStats();
-                    await sendMessage(bot, channelID, message);
+                    var statsText = await stats.getStats();
+                    await sendMessage(bot, typedChannel, statsText);
                     log("catstats command executed");
                     break;
             }
         }
     }
     catch (err) {
-        onError(bot, channelID, err);
+        onError(bot, typedChannel, err);
     }
 });
+
+bot.login(auth.token);
