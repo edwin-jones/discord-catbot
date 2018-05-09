@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "lib": ["es2017", "dom"],
+    "module": "commonjs",
+    "strict": true,
+    "strictNullChecks": false,
+    "outDir": "dist"
+  },
+  "files": [
+    "catbot.ts",
+    "stats.ts"
+  ]
+}

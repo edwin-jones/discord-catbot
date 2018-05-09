@@ -5,6 +5,8 @@
   "main": "catbot.js",
   "scripts": {
     "start": "node catbot.js",
+    "build": "tsc",
+    "develop": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Edwin Jones",
@@ -17,7 +19,12 @@
     "request-promise": "^4.2.2",
     "string-builder": "^0.1.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "10.0.6",
+    "nodemon": "1.17.4",
+    "ts-node": "6.0.3",
+    "typescript": "2.8.3"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/edwinj85/catbot.git"
