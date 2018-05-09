@@ -25,7 +25,7 @@ const helpmsg =
  * @param err the error message to log
  */
 async function onError(channel, err) {
-    log(`Error: ${err}`);
+    log(err);
     await channel.send("Sorry, I'm catnapping now. Please ask me later.");
 }
 
@@ -107,15 +107,15 @@ var bot = new discord.Client();
 //log when the bot is ready
 bot.on('ready', (evt) => {
 
-    log('Connected');
-    log('Logged in as: ');
+    log('connected');
+    log('logged in as: ');
     log(`${bot.user.username} - (${bot.user.id})`);
 });
 
 //handle disconnects by auto reconnecting
 bot.on('disconnect', (erMsg, code) => {
 
-    log(`----- Bot disconnected from Discord with code ${code} for reason: ${erMsg} -----`);
+    log(`----- bot disconnected from Discord with code ${code} for reason: ${erMsg} -----`);
     bot.connect();
 })
 
