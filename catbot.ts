@@ -1,11 +1,10 @@
 //full source for the tutorial this bot is based on is available here: https://medium.com/@renesansz/tutorial-creating-a-simple-discord-bot-9465a2764dc0
 //written by Edwin Jones - http://edwinjones.me.uk
-'use strict';
 
 //dependencies
 const discord = require('discord.io');
 const log = require('debug')('catbot')
-const request = require('request-promise');
+import * as request from 'request-promise';
 
 const stats = require('./stats');
 const auth = require('./auth.json'); //you need to make this file yourself!
@@ -18,7 +17,7 @@ const helpmsg =
 
 
 //send a message to discord
-function sendMessage(bot, channelID, message) {
+function sendMessage(bot: any, channelID: any, message: any) {
 
     return new Promise((resolve, reject) => {
 
@@ -32,7 +31,7 @@ function sendMessage(bot, channelID, message) {
 }
 
 //send an image (via a url) to discord
-function sendImage(bot, channelID, url) {
+function sendImage(bot: any, channelID: any, url: any) {
 
     return new Promise((resolve, reject) => {
 
@@ -52,14 +51,14 @@ function sendImage(bot, channelID, url) {
 }
 
 //error handler
-async function onError(bot, channelID) {
+async function onError(bot: any, channelID: any, err: any) {
 
     log(`Error: ${err}`);
     await sendMessage(bot, channelID, "Sorry, I'm catnapping now. Please ask me later.");
 }
 
 //Use this function to post a cat fact into the relevant discord channel via the bot object.
-async function getCatFact(bot, channelID) {
+async function getCatFact(bot: any, channelID: any) {
 
     var options = {
         method: 'GET',
@@ -75,9 +74,9 @@ async function getCatFact(bot, channelID) {
 }
 
 //use this function to get cat pictures and post them in discord
-async function getCatPic(bot, channelID, userID) {
+async function getCatPic(bot: any, channelID: any) {
 
-    var include_href = function (body, response, resolveWithFullResponse) {
+    var include_href = (body: any, response: any, resolveWithFullResponse: any) => {
         return { 'href': response.request.href };
     };
 
@@ -95,7 +94,7 @@ async function getCatPic(bot, channelID, userID) {
 }
 
 //use this function to stroke catbot!
-async function stroke(bot, channelID, userID) {
+async function stroke(bot: any, channelID: any, userID: any) {
 
     await sendMessage(bot, channelID, "**puuurrrrrrrrrr!** Thank you <@" + userID + "> **:3**");
     await stats.incrementStat("catstrokes");
@@ -110,7 +109,7 @@ var bot = new discord.Client(
     });
 
 //log when the bot is ready
-bot.on('ready', function (evt) {
+bot.on('ready', () => {
 
     log('Connected');
     log('Logged in as: ');
@@ -118,14 +117,14 @@ bot.on('ready', function (evt) {
 });
 
 //handle disconnects by auto reconnecting
-bot.on('disconnect', function (erMsg, code) {
+bot.on('disconnect', (erMsg: any, code: any) => {
 
     log(`----- Bot disconnected from Discord with code ${code} for reason: ${erMsg} -----`);
     bot.connect();
 })
 
 //decide what to do when the bot get a message. NOTE: discord supports markdown syntax.
-bot.on('message', async function (user, userID, channelID, message, evt) {
+bot.on('message', async (user: any, userID: any, channelID: any, message: any, evt: any) => {
 
     try {
         // catbot needs to know if it will execute a command
@@ -168,6 +167,6 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
         }
     }
     catch (err) {
-        onError(bot, channelID);
+        onError(bot, channelID, err);
     }
 });
