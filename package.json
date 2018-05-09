@@ -20,7 +20,9 @@
     "string-builder": "^0.1.4"
   },
   "devDependencies": {
+    "@types/mongodb": "^3.0.18",
     "@types/node": "10.0.6",
+    "@types/request-promise": "4.1.41",
     "nodemon": "1.17.4",
     "ts-node": "6.0.3",
     "typescript": "2.8.3"
