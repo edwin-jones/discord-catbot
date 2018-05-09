@@ -1,16 +1,23 @@
-//dependencies
+// Written by Edwin Jones - http://edwinjones.me.uk
+// Initial port to TypeScript by Jason Browne - https://jbrowne.io
+
+// Dependencies
 const log = require('debug')('stats');
 import { MongoClient, MongoError } from 'mongodb';
 const StringBuilder = require('string-builder');
 
-const auth = require('./auth.json'); //you need to make this file yourself!
+const auth = require('./auth.json'); // you need to make this file yourself!
 
 const dbName = 'catbot';
 const collectionName = 'catstats';
 const client = new MongoClient(auth.mongourl);
 
-
-//Use this function to incremement a stat. Returns a promise.
+/**
+ * Use this function to incremement a stat
+ *
+ * @param name the stat to increment
+ * @returns a Promise that resolves on success, or rejects on failure
+ */
 export function incrementStat(name: string): Promise<void> {
 
     return new Promise((resolve, reject) => {
@@ -43,7 +50,11 @@ export function incrementStat(name: string): Promise<void> {
     });
 }
 
-//use this function to get stats. Returns a promise of a string (to send to chat)
+/**
+ * Use this function to get stats
+ *
+ * @returns a promise of a string (to send to chat)
+ */
 export function getStats(): Promise<string> {
 
     return new Promise((resolve, reject) => {
