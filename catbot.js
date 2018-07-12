@@ -119,13 +119,6 @@ bot.on('ready', (evt) => {
     log(`${bot.user.username} - (${bot.user.id})`);
 });
 
-//handle disconnects by auto reconnecting
-bot.on('disconnect', (erMsg, code) => {
-
-    log(`----- bot disconnected from Discord with code ${code} for reason: ${erMsg} -----`);
-    bot.connect();
-})
-
 // Decide what to do when the bot get a message. NOTE: discord supports markdown syntax.
 bot.on('message', async (message) => {
 
