@@ -20,10 +20,10 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/edwinj85/catbot.git"
+    "url": "git+https://github.com/edwin-jones/catbot.git"
   },
   "bugs": {
-    "url": "https://github.com/edwinj85/catbot/issues"
+    "url": "https://github.com/edwin-jones/catbot/issues"
   },
-  "homepage": "https://github.com/edwinj85/catbot#readme"
+  "homepage": "https://github.com/edwin-jones/catbot#readme"
 }
