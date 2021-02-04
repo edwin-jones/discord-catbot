@@ -22,6 +22,11 @@ const collectionName = 'catstats';
  */
 exports.incrementStat = (name) => {
 
+    if (!auth.mongourl) {
+        log("Trying to update statistics but auth.mongourl not specified");
+        return Promise.resolve();
+    }
+
     return new Promise((resolve, reject) => {
 
         client.connect(auth.mongourl, function (err, client) {
@@ -66,6 +71,11 @@ exports.incrementStat = (name) => {
  * @returns a promise of a string (to send to chat)
  */
 exports.getStats = () => {
+
+    if (!auth.mongourl) {
+        log("Statistics requested but auth.mongourl not specified");
+        return Promise.resolve("Stats disabled");
+    }
 
     return new Promise((resolve, reject) => {
 
