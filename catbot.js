@@ -5,17 +5,14 @@
 
 //dependencies
 const discord = require('discord.js');
-const log = require('debug')('catbot');
 const request = require('request-promise');
-
-const stats = require('./stats');
+const facts = require('./facts.json');
 const auth = require('./auth.json'); //you need to make this file yourself!
 
 const helpmsg =
     "You can ask me for a random cat fact with **!catfact**, picture with **!catpic** " +
     "or you can stroke me with **!stroke** - " +
-    "I do love to be stroked **:3**\n" +
-    "I can also provide interesting stats with the **!catstats** command.";
+    "I do love to be stroked **:3**";
 
 
 /**
@@ -26,7 +23,7 @@ const helpmsg =
  */
 async function onError(channel, err) {
 
-    log(err);
+    console.log(err);
     await channel.send("Sorry, I'm catnapping now. Please ask me later.");
 }
 
@@ -55,18 +52,11 @@ function sendImage(channel, url) {
  */
 async function getCatFact(channel) {
 
-    var options = {
+    const index = Math.floor(Math.random() * facts.length);
+    let fact = facts[index];
 
-        method: 'GET',
-        uri: 'https://polite-catfacts.herokuapp.com/catfact',
-        json: true
-    }
-
-    let response = await request(options);
-
-    await channel.send(response.fact);
-    await stats.incrementStat("catfacts");
-    log("catfact command completed");
+    await channel.send(fact);
+    console.log("catfact command completed");
 }
 
 /**
@@ -76,7 +66,7 @@ async function getCatFact(channel) {
  */
 async function getCatPic(channel) {
 
-    var include_href = function (body, response, resolveWithFullResponse) {
+    var include_href = function (_, response, __) {
 
         return { 'href': response.request.href };
     };
@@ -90,9 +80,8 @@ async function getCatPic(channel) {
 
     let response = await request(options);
     await sendImage(channel, response.href);
-    await stats.incrementStat("catpics");
 
-    log("catpic command completed");
+    console.log("catpic command completed");
 }
 
 /**
@@ -104,8 +93,7 @@ async function getCatPic(channel) {
 async function stroke(channel, userID) {
 
     await channel.send(`**puuurrrrrrrrrr!** Thank you <@${userID}> **:3**`);
-    await stats.incrementStat("catstrokes");
-    log("catstroke command completed");
+    console.log("catstroke command completed");
 }
 
 // Initialize Discord Bot
@@ -114,21 +102,22 @@ var bot = new discord.Client();
 //log when the bot is ready
 bot.on('ready', (evt) => {
 
-    log('connected');
-    log('logged in as: ');
-    log(`${bot.user.username} - (${bot.user.id})`);
+    console.log('connected');
+    console.log('logged in as: ');
+    console.log(`${bot.user.username} - (${bot.user.id})`);
 });
 
 // Decide what to do when the bot get a message. NOTE: discord supports markdown syntax.
 bot.on('message', async (message) => {
 
+    console.log("recieved a message");
     try {
 
         // catbot needs to know if it will execute a command
         // It will listen for messages that will start with `!`
         if (message.content.substring(0, 1) == '!') {
 
-            log('recieved a command!')
+            console.log('recieved a command!')
 
             let args = message.content.substring(1).split(' ');
             let cmd = args[0];
@@ -139,28 +128,22 @@ bot.on('message', async (message) => {
                 // handle commands
                 case 'help':
                     await message.channel.send(helpmsg);
-                    log("help command executed");
+                    console.log("help command executed");
                     break;
 
                 case 'catfact':
                     await getCatFact(message.channel);
-                    log("catfact command executed");
+                    console.log("catfact command executed");
                     break;
 
                 case 'catpic':
                     await getCatPic(message.channel);
-                    log("catpic command executed");
+                    console.log("catpic command executed");
                     break;
 
                 case 'stroke':
                     await stroke(message.channel, message.author.id);
-                    log("stroke command executed");
-                    break;
-
-                case 'catstats':
-                    var statsText = await stats.getStats();
-                    await message.channel.send(statsText);
-                    log("catstats command executed");
+                    console.log("stroke command executed");
                     break;
             }
         }
